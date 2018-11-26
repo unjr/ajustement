@@ -56,18 +56,18 @@ incertitude_2010 = np.sqrt(2010**2*cor_mat[0,0]+cor_mat[1,1]+2*cor_mat[0,1])
 # Nouvelle fonction de fit
 
 def affine2(x,a,b):
-    return a*(x-min(x))+b
+    return a*(x-np.mean(x))+b
 
 p_opt,cor_mat = curve_fit(affine2, x, y, [1,0])
 
-plt.plot(x-min(x),y)
-plt.plot(x-min(x),p_opt[0]*(x-min(x))+p_opt[1])
+plt.plot(x-np.mean(x),y)
+plt.plot(x-np.mean(x),p_opt[0]*(x-np.mean(x))+p_opt[1])
 
 incertitude_b = np.sqrt(cor_mat[1,1])
 
 valeur_2010 = p_opt[0]*2010+p_opt[1]
 
-incertitude_2010 = np.sqrt((2010-min(x))**2*cor_mat[0,0]+cor_mat[1,1]+2*cor_mat[0,1])
+incertitude_2010 = np.sqrt((2010-np.mean(x))**2*cor_mat[0,0]+cor_mat[1,1]+2*cor_mat[0,1])
  
 
 # FIT D'UNE IMAGE
@@ -76,12 +76,19 @@ image = np.loadtxt('double_star.txt')
 ny, nx = image.shape
 X,Y = np.meshgrid(range(nx),range(ny))
 xdata = np.array([X.flatten(),Y.flatten()]).transpose()
-ydata = 
 
 def gauss(xdata, amplitude, center_x, center_y, diameter):
     x = xdata[:,0]
-    y = ydata[:,1]
+    y = xdata[:,1]
     return amplitude*np.exp(-((x-center_x)**2 + (y-center_y)**2)/diameter**2)
 
-p0 = [0,0,0,0]
+p0 = [1,0,0,1]
 popt,pcov = curve_fit(gauss,xdata,image.flatten(),p0)
+gaussienne1 = gauss(xdata,popt[0],popt[1],popt[2],popt[3])
+
+from mpl_toolkits.mplot3d import Axes3D
+
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+
+ax.plot_surface(xdata[:,0],xdata[:,1],gaussienne1)
